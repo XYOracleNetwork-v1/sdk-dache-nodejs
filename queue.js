@@ -4,20 +4,66 @@ AWS.config.update({region: 'us-east-1'});
 const sqs = new AWS.SQS({apiVersion: '2012-11-05'});
 const queueUrl = process.env.AWS_SQS_URL;
 
-const retryWaitTimeMs = 100;
+const sendRetryWaitTimeMs = 100;
+const maxNumberOfMessagesToReceive = 2; // Between 1 and 10
+const visibilityTimeoutSeconds = 30; // Amount of time the messages can't be received by another consumer if they aren't deleted due to error
 
-function sendMessage(contract, event) {
+
+exports.sendMessage = (contract, event) => {
     sqs.sendMessage(getParams(contract, event), function (err, data) {
         if (err) {
-            console.error(`SQS error: ${err.message}, retrying in ${retryWaitTimeMs} ms...`);
+            console.error(`SQS error: ${err.message}, retrying in ${sendRetryWaitTimeMs} ms...`);
             setTimeout(function () {
-                sendMessage(contract, event)
-            }, retryWaitTimeMs)
+                exports.sendMessage(contract, event)
+            }, sendRetryWaitTimeMs)
         } else {
-            console.log('Queued event')
+            console.log(`Queued ${event.event} from ${contract.name}, transaction ${event.transactionHash}`)
         }
     });
-}
+};
+
+exports.receiveMessages = () => {
+    const params = {
+        AttributeNames: [
+            "SentTimestamp"
+        ],
+        MaxNumberOfMessages: maxNumberOfMessagesToReceive,
+        MessageAttributeNames: [
+            "All"
+        ],
+        QueueUrl: queueUrl,
+        VisibilityTimeout: visibilityTimeoutSeconds,
+        WaitTimeSeconds: 0
+    };
+    return new Promise((resolve, reject) => {
+        sqs.receiveMessage(params, function (err, data) {
+            let messages = [];
+            if (err) {
+                return reject(err)
+            } else if (data.Messages) {
+                messages = data.Messages;
+            }
+            resolve(messages);
+        })
+    })
+};
+
+exports.deleteMessage = (message) => {
+    const params = {
+        QueueUrl: queueUrl,
+        ReceiptHandle: message.ReceiptHandle
+    };
+    return new Promise((resolve, reject) => {
+        sqs.deleteMessage(params, function (err, data) {
+            if (err) {
+                console.error(`Error deleting message ${message.MessageId} from sqs`, err);
+                reject(err)
+            } else {
+                resolve()
+            }
+        })
+    })
+};
 
 function getParams(contract, event) {
     return {
@@ -40,5 +86,3 @@ function getParams(contract, event) {
         MessageGroupId: contract.name
     };
 }
-
-exports.sendMessage = sendMessage;
