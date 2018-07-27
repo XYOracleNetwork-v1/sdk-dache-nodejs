@@ -38,7 +38,7 @@ exports.saveTransactionAndEvent = async (contractName, event) => {
 
 exports.getUnconfirmedTransactionHashes = async (blockNumber) => {
     const result = await db.query(`SELECT transaction_hash FROM blockchain_transactions
-                                   WHERE status = 'unconfirmed' AND block_number <= $1 LIMIT 1`, [blockNumber]);
+                                   WHERE status = 'unconfirmed' AND block_number <= $1`, [blockNumber]);
     return result.rows.map(row => row.transaction_hash);
 };
 
