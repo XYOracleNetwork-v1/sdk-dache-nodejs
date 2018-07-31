@@ -1,5 +1,4 @@
 {
-  "address": "0x06012c8cf97BEaD5deAe237070F9587f8E7A266d",
   "contractName": "CryptoKittiesCore",
   "abi": [
     {
@@ -1104,5 +1103,10 @@
       "name": "ContractUpgrade",
       "type": "event"
     }
-  ]
+  ],
+  "networks": {
+    "1": {
+      "address": "0x06012c8cf97BEaD5deAe237070F9587f8E7A266d"
+    }
+  }
 }

@@ -1,11 +1,33 @@
-const fs = require('fs');
 const queue = require('./queue.js');
 
+const networks = {
+    'mainnet': 1,
+    'ropsten': 3,
+    'rinkeby': 4,
+    'kovan': 42
+};
+
 class Contract {
-    constructor(web3, address, abi, name) {
+    constructor(web3, contractJson) {
         this.web3 = web3;
-        this.contract = new web3.eth.Contract(abi, address);
-        this.name = name
+        this.abi = contractJson.abi;
+        this.contract = new web3.eth.Contract(contractJson.abi, Contract.getAddressFromJson(contractJson));
+        if (!contractJson.contractName) {
+            throw new Error('Missing contractName in JSON');
+        }
+        this.name = contractJson.contractName;
+    }
+
+    static getAddressFromJson(contractJson) {
+        if (!contractJson.networks) {
+            return null;
+        }
+        const network = contractJson.networks[networks[process.env.ETHEREUM_NETWORK]];
+        return network ? network.address : null;
+    }
+
+    hasEvents() {
+        return this.abi.find(i => i.type === 'event');
     }
 
     listenForEvents() {
@@ -19,13 +41,6 @@ class Contract {
             console.error(`Error listening on ${this.name}: ${error.message}, re-attaching listeners...`);
             eventEmitter.removeAllListeners();
             this.listenForEvents()
-        })
-    }
-
-    static loadAndStartListening(web3) {
-        fs.readdirSync('./contracts').forEach(fileName => {
-            const contractJson = require(`./contracts/${fileName}`);
-            new Contract(web3, contractJson.address, contractJson.abi, contractJson.contractName).listenForEvents()
         })
     }
 }
