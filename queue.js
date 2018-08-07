@@ -1,8 +1,13 @@
+const config = require('config');
 const AWS = require('aws-sdk');
-AWS.config.update({region: 'us-east-1'});
+AWS.config.update({
+    region: config.get('aws.region'),
+    accessKeyId: config.get('aws.accessKeyId'),
+    secretAccessKey: config.get('aws.secretAccessKey'),
+});
 
 const sqs = new AWS.SQS({apiVersion: '2012-11-05'});
-const queueUrl = process.env.AWS_SQS_URL;
+const queueUrl = config.get('aws.sqsUrl');
 
 const sendRetryWaitTimeMs = 100;
 const maxNumberOfMessagesToReceive = 2; // Between 1 and 10

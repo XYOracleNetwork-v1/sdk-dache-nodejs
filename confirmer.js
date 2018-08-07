@@ -1,7 +1,10 @@
 const queue = require('./queue.js');
 const persistence = require('./persistence');
 const Web3 = require('web3');
-const web3 = new Web3(new Web3.providers.WebsocketProvider(process.env.WEB3_WS_PROVIDER_URL));
+const config = require('config');
+const web3 = new Web3(new Web3.providers.WebsocketProvider(config.get('ethereum.web3WebsocketUrl')));
+
+const n = config.get('ethereum.numberOfBlocksForConfirmation');
 
 let running = false;
 web3.eth.subscribe('newBlockHeaders', function (error, result) {

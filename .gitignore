@@ -61,3 +61,6 @@ typings/
 .next
 
 .idea
+
+config
+!config/default.example.json

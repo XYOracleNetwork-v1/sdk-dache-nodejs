@@ -1,7 +1,8 @@
 const queue = require('./queue.js');
 const persistence = require('./persistence');
+const config = require('config');
 const Web3 = require('web3');
-const web3 = new Web3(new Web3.providers.WebsocketProvider(process.env.WEB3_WS_PROVIDER_URL));
+const web3 = new Web3(new Web3.providers.WebsocketProvider(config.get('ethereum.web3WebsocketUrl')));
 
 web3.eth.subscribe('newBlockHeaders', function (error, result) {
     if (error) {

@@ -1,4 +1,5 @@
 const queue = require('./queue.js');
+const config = require('config');
 
 const networks = {
     'mainnet': 1,
@@ -22,7 +23,7 @@ class Contract {
         if (!contractJson.networks) {
             return null;
         }
-        const network = contractJson.networks[networks[process.env.ETHEREUM_NETWORK]];
+        const network = contractJson.networks[networks[config.get('ethereum.network')]];
         return network ? network.address : null;
     }
 

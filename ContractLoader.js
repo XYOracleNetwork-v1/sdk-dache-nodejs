@@ -1,14 +1,21 @@
 const fs = require('fs');
 const AWS = require('aws-sdk');
+const config = require('config');
 const s3 = new AWS.S3();
 const Contract = require('./Contract');
 
 let load;
+let localDirectory;
+let bucketName;
+let keyPrefix;
 
-if (process.env.CONTRACT_SOURCE === 's3') {
+if (config.get('watcher.contractSource.type') === 's3') {
     load = loadFromS3;
+    bucketName = config.get('watcher.contractSource.bucketName');
+    keyPrefix = config.get('watcher.contractSource.keyPrefix');
 } else {
     load = loadFromFilesystem;
+    localDirectory = config.get('watcher.contractSource.directory');
 }
 
 exports.loadContracts = async (web3) => {
@@ -31,15 +38,12 @@ exports.loadContracts = async (web3) => {
 
 function loadFromFilesystem(web3) {
     const contractJsons = [];
-    fs.readdirSync('./contracts').forEach(fileName => contractJsons.push(require(`./contracts/${fileName}`)));
+    fs.readdirSync(localDirectory).forEach(fileName => contractJsons.push(require(`${localDirectory}/${fileName}`)));
     if (contractJsons.length === 0) {
         throw new Error('Found no contracts to load')
     }
     return contractJsons;
 }
-
-const bucketName = process.env.CONTRACT_S3_BUCKET_NAME;
-const keyPrefix = process.env.CONTRACT_S3_KEY_PREFIX;
 
 async function loadFromS3(web3) {
     const params = {
