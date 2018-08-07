@@ -22,8 +22,7 @@ exports.saveTransactionAndEvent = async (contractName, event) => {
                             VALUES($1, $2)
                             ON CONFLICT ON CONSTRAINT blockchain_transactions_transaction_hash_pk DO UPDATE
                             SET block_number = $2, updated_at = current_timestamp`, transactionValues);
-        const insertEvent = await client.query(`INSERT INTO
-        log_index, event, removed, transaction_hash, metadata)
+        const insertEvent = await client.query(`INSERT INTO blockchain_events (contract_name, event_name, log_index, event, removed, transaction_hash, metadata)
                             VALUES($1, $2, $3, $4, $5, $6, $7)
                             ON CONFLICT ON CONSTRAINT blockchain_events_transaction_hash_log_index_pk DO UPDATE
                             SET removed = $5, updated_at = current_timestamp WHERE blockchain_events.removed IS NOT TRUE`, eventValues);
