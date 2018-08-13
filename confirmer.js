@@ -1,4 +1,4 @@
-const persistence = require('./persistence');
+const storage = require('./storage.js')();
 const Web3 = require('web3');
 const config = require('config');
 const web3 = new Web3(new Web3.providers.WebsocketProvider(config.get('ethereum.web3WebsocketUrl')));
@@ -23,7 +23,7 @@ web3.eth.subscribe('newBlockHeaders', function (error, result) {
 
 async function confirm() {
     const currentBlockNumber = await web3.eth.getBlockNumber();
-    const transactionHashes = await persistence.getUnconfirmedTransactionHashes(currentBlockNumber - numberOfBlocksForConfirmation);
+    const transactionHashes = await storage.getUnconfirmedTransactionHashes(currentBlockNumber - numberOfBlocksForConfirmation);
     const promises = [];
     transactionHashes.forEach(transactionHash => promises.push(web3.eth.getTransactionReceipt(transactionHash)));
     const confirmedTransactions = [];
@@ -37,8 +37,8 @@ async function confirm() {
         }
     });
     await Promise.all([
-        persistence.confirmTransactionHashes(confirmedTransactions),
-        persistence.revertTransactionHashes(revertedTransactions)
+        storage.confirmTransactionHashes(confirmedTransactions),
+        storage.revertTransactionHashes(revertedTransactions)
     ]);
     console.log(`Confirmed ${confirmedTransactions.length} transactions, Reverted ${revertedTransactions.length} transactions`);
 }

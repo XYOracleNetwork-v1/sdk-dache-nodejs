@@ -1,5 +1,5 @@
 const queue = require('./queue.js')();
-const persistence = require('./persistence');
+const storage = require('./storage.js')();
 const config = require('config');
 const Web3 = require('web3');
 const web3 = new Web3(new Web3.providers.WebsocketProvider(config.get('ethereum.web3WebsocketUrl')));
@@ -37,5 +37,5 @@ async function consumeMessage(message) {
 }
 
 function consume(contractName, eventJson) {
-    return persistence.saveTransactionAndEvent(contractName, eventJson);
+    return storage.saveTransactionAndEvent(contractName, eventJson);
 }
