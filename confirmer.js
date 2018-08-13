@@ -1,10 +1,9 @@
-const queue = require('./queue.js');
 const persistence = require('./persistence');
 const Web3 = require('web3');
 const config = require('config');
 const web3 = new Web3(new Web3.providers.WebsocketProvider(config.get('ethereum.web3WebsocketUrl')));
 
-const n = config.get('ethereum.numberOfBlocksForConfirmation');
+const numberOfBlocksForConfirmation = config.get('ethereum.numberOfBlocksForConfirmation');
 
 let running = false;
 web3.eth.subscribe('newBlockHeaders', function (error, result) {
@@ -23,7 +22,6 @@ web3.eth.subscribe('newBlockHeaders', function (error, result) {
 });
 
 async function confirm() {
-    const numberOfBlocksForConfirmation = 10;
     const currentBlockNumber = await web3.eth.getBlockNumber();
     const transactionHashes = await persistence.getUnconfirmedTransactionHashes(currentBlockNumber - numberOfBlocksForConfirmation);
     const promises = [];

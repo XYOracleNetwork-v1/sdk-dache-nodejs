@@ -1,4 +1,4 @@
-const queue = require('./queue.js');
+const queue = require('./queue.js')();
 const persistence = require('./persistence');
 const config = require('config');
 const Web3 = require('web3');
@@ -18,7 +18,7 @@ web3.eth.subscribe('newBlockHeaders', function (error, result) {
 
 async function receiveMessagesAndConsume() {
     const promises = [];
-    const messages = await queue.receiveMessages();
+    const messages = await queue.getItems();
     messages.forEach(message => {
         promises.push(
             consumeMessage(message)
@@ -33,7 +33,7 @@ async function consumeMessage(message) {
     const contractName = message.MessageAttributes.contractName.StringValue;
     const eventJson = JSON.parse(message.Body);
     await consume(contractName, eventJson);
-    await queue.deleteMessage(message);
+    await queue.dequeueItem(message);
 }
 
 function consume(contractName, eventJson) {

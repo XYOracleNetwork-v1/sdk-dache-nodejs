@@ -1,4 +1,4 @@
-const queue = require('./queue.js');
+const queue = require('./queue.js')();
 const config = require('config');
 
 const networks = {
@@ -33,8 +33,8 @@ class Contract {
 
     listenForEvents() {
         const eventEmitter = this.contract.events.allEvents();
-        eventEmitter.on('data', event => queue.sendMessage(this, event));
-        eventEmitter.on('changed', event => queue.sendMessage(this, event));
+        eventEmitter.on('data', event => queue.enqueueItem(this, event));
+        eventEmitter.on('changed', event => queue.enqueueItem(this, event));
 
         console.info(`Listening for events from contract ${this.name}`);
 
