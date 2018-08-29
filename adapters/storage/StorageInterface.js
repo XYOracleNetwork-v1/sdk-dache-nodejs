@@ -1,6 +1,6 @@
 class StorageInterface {
 
-    saveTransactionsAndEvents(contractName, events) {
+    saveTransactionsAndEvents(contractName, events, deleteExisting = false) {
         throw new Error('Not implemented');
     }
 
