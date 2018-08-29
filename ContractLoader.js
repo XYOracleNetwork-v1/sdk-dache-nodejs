@@ -4,6 +4,12 @@ const config = require('config');
 const s3 = new AWS.S3();
 const Contract = require('./Contract');
 
+const Web3 = require('web3');
+const web3 = {
+    http: new Web3(new Web3.providers.HttpProvider(config.get('ethereum.web3HttpUrl'))),
+    websocket: new Web3(new Web3.providers.WebsocketProvider(config.get('ethereum.web3WebsocketUrl')))
+};
+
 let load;
 let localDirectory;
 let bucketName;
@@ -18,7 +24,7 @@ if (config.get('watcher.contractSource.type') === 's3') {
     localDirectory = config.get('watcher.contractSource.directory');
 }
 
-exports.loadContracts = async (web3) => {
+exports.loadContracts = async () => {
     const contractJsons = await load(web3);
     const contracts = [];
     contractJsons.forEach(contractJson => {

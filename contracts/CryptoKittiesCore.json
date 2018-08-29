@@ -1106,7 +1106,8 @@
   ],
   "networks": {
     "1": {
-      "address": "0x06012c8cf97BEaD5deAe237070F9587f8E7A266d"
+      "address": "0x06012c8cf97BEaD5deAe237070F9587f8E7A266d",
+      "transactionHash": "0x691f348ef11e9ef95d540a2da2c5f38e36072619aa44db0827e1b8a276f120f4"
     }
   }
 }

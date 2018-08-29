@@ -20,22 +20,3 @@ To use S3 to load contracts instead of a local directory, change the source in t
     "keyPrefix": "abi/mainnet/"
 }
 ```
-
-## Watcher
-
-This component watches loaded contracts for all events and enqueues to an AWS SQS FIFO queue.
-
-To start: `npm run-script start-watcher`
-
-## Consumer
-
-This component consumes from the queue and persists transaction/events to a database.
-
-To start: `npm run-script start-consumer`
-
-## Confirmer
-
-This component confirms transactions that were consumed after a configured amount of blocks have passed.
-
-To start: `npm run-script start-confimer`
-
