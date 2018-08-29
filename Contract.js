@@ -68,7 +68,7 @@ class Contract {
 
     async rebase(currentBlock) {
         const transactionReceipt = await this.web3.http.eth.getTransactionReceipt(this.transactionHash);
-        const birthBlock = 6230300;//transactionReceipt.blockNumber;
+        const birthBlock = transactionReceipt.blockNumber;
         let fromBlock = birthBlock;
         let toBlock = Math.min(birthBlock + blockScanIncrement, currentBlock);
         let adjustableBlockScanIncrement = blockScanIncrement;
