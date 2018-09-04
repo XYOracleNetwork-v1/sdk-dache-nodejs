@@ -12,6 +12,7 @@
   "dependencies": {
     "aws-sdk": "^2.282.1",
     "config": "^2.0.1",
+    "lokijs": "^1.5.5",
     "pg-promise": "^8.4.6",
     "web3": "1.0.0-beta.35"
   }
