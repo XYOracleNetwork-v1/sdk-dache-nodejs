@@ -15,13 +15,13 @@ let localDirectory;
 let bucketName;
 let keyPrefix;
 
-if (config.get('watcher.contractSource.type') === 's3') {
+if (config.get('contractSource.type') === 's3') {
     load = loadFromS3;
-    bucketName = config.get('watcher.contractSource.bucketName');
-    keyPrefix = config.get('watcher.contractSource.keyPrefix');
+    bucketName = config.get('contractSource.bucketName');
+    keyPrefix = config.get('contractSource.keyPrefix');
 } else {
     load = loadFromFilesystem;
-    localDirectory = config.get('watcher.contractSource.directory');
+    localDirectory = config.get('contractSource.directory');
 }
 
 exports.loadContracts = async () => {

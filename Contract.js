@@ -8,7 +8,7 @@ const networks = {
     'kovan': 42
 };
 
-const blockScanIncrement = 1000;
+const blockScanIncrement = config.get('rebase.blockScanIncrement');
 
 class Contract {
     constructor(web3, contractJson) {
@@ -62,7 +62,9 @@ class Contract {
 
     async sync() {
         const currentBlock = await this.web3.http.eth.getBlockNumber();
-        this.rebase(currentBlock);
+        if (config.get('rebase.enabled') === true) {
+            this.rebase(currentBlock);
+        }
         this.scanBlocks(currentBlock);
     }
 
@@ -104,7 +106,7 @@ class Contract {
     }
 
     async scanBlocks(currentBlock) {
-        const offset = 10;
+        const offset = config.get('sync.blockScanOffset');
         let running = false;
         let fromBlock = currentBlock;
         this.web3.websocket.eth.subscribe('newBlockHeaders', (error, result) => {
