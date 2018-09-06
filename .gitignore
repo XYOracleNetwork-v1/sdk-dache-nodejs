@@ -62,5 +62,5 @@ typings/
 
 .idea
 
-config
+config/*
 !config/default.example.json

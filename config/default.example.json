@@ -1,0 +1,26 @@
+{
+  "ethereum": {
+    "network": "mainnet",
+    "web3WebsocketUrl": "wss://mainnet.infura.io/ws",
+    "web3HttpUrl": "https://mainnet.infura.io"
+  },
+  "storage": {
+    "type": "postgres",
+    "database": "",
+    "host": "",
+    "password": "",
+    "user": "",
+    "port": 5432
+  },
+  "contractSource": {
+    "type": "local",
+    "directory": "./contracts"
+  },
+  "rebase": {
+    "enabled": false,
+    "blockScanIncrement": 1000
+  },
+  "sync": {
+    "blockScanOffset": 10
+  }
+}
