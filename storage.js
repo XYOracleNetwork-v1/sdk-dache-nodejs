@@ -1,15 +1,24 @@
 const config = require('config');
 
+let storage;
+
 module.exports = () => {
     let storageType = config.get('storage.type');
     switch (storageType) {
-        case 'loki':
-            const LokiStorage = require('./adapters/storage/LokiStorage.js');
-            return new LokiStorage();
+        case 'nedb':
+            const NeDBStorage = require('./adapters/storage/NeDBStorage.js');
+            if(!storage) {
+                storage = new NeDBStorage();
+            }
+            break;
         case 'postgres':
             const PostgresStorage = require('./adapters/storage/PostgresStorage.js');
-            return new PostgresStorage();
+            if(!storage) {
+                storage = new PostgresStorage();
+            }
+            break;
         default:
             throw new Error(`Could not instantiate queue type: ${storageType}`);
     }
+    return storage;
 };
