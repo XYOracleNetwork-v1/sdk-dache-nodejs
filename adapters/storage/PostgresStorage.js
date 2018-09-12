@@ -11,11 +11,11 @@ const db = pgp({
 });
 
 const transactionColumnSet = new pgp.helpers.ColumnSet(['transaction_hash', 'block_number'], {table: 'blockchain_transactions'});
-const eventColumnSet = new pgp.helpers.ColumnSet(['contract_name', 'event_name', 'log_index', 'event', 'transaction_hash', 'metadata'], {table: 'blockchain_events'});
+const eventColumnSet = new pgp.helpers.ColumnSet(['contract_name', 'event_name', 'log_index', 'event', 'transaction_hash', 'return_values'], {table: 'blockchain_events'});
 
 class PostgresStorage extends StorageInterface {
 
-    async saveTransactionsAndEvents(contractName, events, deleteExisting = false) {
+    async save(contractName, events, deleteExisting = false) {
 
         const transactionRows = [];
         const eventRows = [];
@@ -31,7 +31,7 @@ class PostgresStorage extends StorageInterface {
                 log_index: event.logIndex,
                 event: event,
                 transaction_hash: event.transactionHash,
-                metadata: event.returnValues
+                return_values: event.returnValues
             })
         });
 
@@ -58,6 +58,40 @@ class PostgresStorage extends StorageInterface {
 
             return t.batch(queries);
         })
+    }
+
+    async getLatestEvents(args) {
+        let query = `
+        SELECT * FROM blockchain_transactions t, blockchain_events e
+        WHERE t.transaction_hash = e.transaction_hash
+        ORDER BY t.block_number DESC LIMIT $1`;
+        const events = await db.any(query, args.limit);
+        return PostgresStorage.transformEvents(events);
+    }
+
+    async getKittyHistory(kittyId) {
+        let query = `
+        SELECT t.block_number, e.event_name, e.return_values
+        FROM blockchain_transactions t, blockchain_events e
+        WHERE t.transaction_hash = e.transaction_hash AND
+        (e.return_values->>'kittyId' = $1 OR
+         e.return_values->>'matronId' = $1 OR
+         e.return_values->>'sireId' = $1 OR
+         e.return_values->>'tokenId' = $1)
+        ORDER BY t.block_number;`;
+        const events = await db.any(query, kittyId.toString());
+        return PostgresStorage.transformEvents(events);
+    }
+
+    static transformEvents(events) {
+        events.forEach(event => {
+            Object.keys(event).forEach(key => {
+                const camelCasedKey = key.replace(/_([a-z])/g, g => g[1].toUpperCase());
+                event[camelCasedKey] = event[key];
+                delete event[key];
+            });
+        });
+        return events;
     }
 
 }

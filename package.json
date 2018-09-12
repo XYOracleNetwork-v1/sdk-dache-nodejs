@@ -12,7 +12,11 @@
   "dependencies": {
     "aws-sdk": "^2.308.0",
     "config": "^2.0.1",
-    "lokijs": "^1.5.5",
+    "express": "^4.16.3",
+    "express-graphql": "^0.6.12",
+    "graphql": "^14.0.0",
+    "graphql-type-json": "^0.2.1",
+    "nedb": "^1.8.0",
     "pg-promise": "^8.4.6",
     "web3": "1.0.0-beta.35"
   }

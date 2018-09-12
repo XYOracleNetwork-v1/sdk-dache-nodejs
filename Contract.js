@@ -49,7 +49,7 @@ class Contract {
 
     listenForEvents() {
         const eventEmitter = this.contractWebsocket.events.allEvents();
-        eventEmitter.on('data', event => storage.saveTransactionsAndEvents(this.name, [event]));
+        eventEmitter.on('data', event => storage.processEvents(this.name, [event]));
 
         console.info(`${this.getLogPrefix()}: Listening for live events`);
 
@@ -92,7 +92,7 @@ class Contract {
                 console.log(`${this.getLogPrefix()}: Rebase: Found ${events.length} events in block range ${fromBlock} - ${toBlock}`);
                 try {
                     if (events.length > 0) {
-                        await storage.saveTransactionsAndEvents(this.name, events, true);
+                        await storage.processEvents(this.name, events, true);
                     }
                     fromBlock = toBlock + 1;
                     toBlock = Math.min(fromBlock + blockScanIncrement, currentBlock);
@@ -108,7 +108,7 @@ class Contract {
     async scanBlocks(currentBlock) {
         const offset = config.get('sync.blockScanOffset');
         let running = false;
-        let fromBlock = currentBlock;
+        let fromBlock = currentBlock + 1;
         this.web3.websocket.eth.subscribe('newBlockHeaders', (error, result) => {
             if (error) {
                 console.log(error);
@@ -132,7 +132,7 @@ class Contract {
                         console.log(`${this.getLogPrefix()}: Scan: Found ${events.length} events in block range ${fromBlock} - ${toBlock}`);
                         try {
                             if (events.length > 0) {
-                                await storage.saveTransactionsAndEvents(this.name, events, true);
+                                await storage.processEvents(this.name, events, true);
                             }
                             fromBlock = toBlock + 1;
                         } catch (error) {

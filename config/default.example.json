@@ -5,12 +5,7 @@
     "web3HttpUrl": "https://mainnet.infura.io"
   },
   "storage": {
-    "type": "postgres",
-    "database": "",
-    "host": "",
-    "password": "",
-    "user": "",
-    "port": 5432
+    "type": "nedb"
   },
   "contractSource": {
     "type": "local",
