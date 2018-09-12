@@ -17,7 +17,7 @@ create table blockchain_events
 	contract_name varchar(255) not null,
 	event_name varchar(255) not null,
 	event json not null,
-	metadata json not null,
+	return_values json not null,
 	constraint blockchain_events_transaction_hash_log_index_pk
 		primary key (transaction_hash, log_index)
 )
