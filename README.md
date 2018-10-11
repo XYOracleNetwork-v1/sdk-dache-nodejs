@@ -75,6 +75,16 @@ Options for `ethereum.network`:
 -  rinkeby
 -  kovan
 
+To us IPFS to load contracts, update the config to have the following entries:
+```
+"contractSource": {
+    "type": "ipfs",
+    "directoryHash": "QmWA8zB1zkEMGmKnD8PNHrJuQPW5hfV5NrYjYMvB6jB1Ac",
+    "host": "ipfs.xyo.network",
+    "protocol": "https",
+    "port": 5002
+}
+```
 
 To use S3 to load contracts instead of a local directory, update the config to have the following entries:
 ```
