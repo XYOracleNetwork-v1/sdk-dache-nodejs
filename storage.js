@@ -18,7 +18,7 @@ module.exports = () => {
             }
             break;
         default:
-            throw new Error(`Could not instantiate queue type: ${storageType}`);
+            throw new Error(`Unknown storage type: ${storageType}`);
     }
     return storage;
 };
