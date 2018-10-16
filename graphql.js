@@ -32,7 +32,7 @@ const queryType = new graphql.GraphQLObjectType({
     kittyHistory: {
       type: new graphql.GraphQLList(EventType),
       args: {
-        kittyId: { type: graphql.GraphQLInt }
+        kittyId: { type: graphql.GraphQLString }
       }
     }
   }

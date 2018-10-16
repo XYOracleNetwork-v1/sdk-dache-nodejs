@@ -91,7 +91,7 @@ class PostgresStorage extends StorageInterface {
          e.return_values->>'sireId' = $1 OR
          e.return_values->>'tokenId' = $1)
         ORDER BY t.block_number;`
-    const events = await this.db.any(query, kittyId.toString())
+    const events = await this.db.any(query, kittyId)
     return PostgresStorage.transformEvents(events)
   }
 

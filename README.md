@@ -63,7 +63,7 @@ To query all events by a given return value key/value:
 To see a history (birth, any transfers and any instance where it is a parent) for a given kittyId:
 ```
 {
-  kittyHistory(kittyId: 998570) {
+  kittyHistory(kittyId: "1047") {
     eventName
     blockNumber
     returnValues

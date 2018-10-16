@@ -22,13 +22,12 @@ class NeDBStorage extends StorageInterface {
   }
 
   getKittyHistory (kittyId) {
-    const kittyIdString = kittyId.toString()
     const query = {
       $or: [
-        { 'returnValues.kittyId': kittyIdString },
-        { 'returnValues.matronId': kittyIdString },
-        { 'returnValues.sireId': kittyIdString },
-        { 'returnValues.tokenId': kittyIdString }
+        { 'returnValues.kittyId': kittyId },
+        { 'returnValues.matronId': kittyId },
+        { 'returnValues.sireId': kittyId },
+        { 'returnValues.tokenId': kittyId }
       ]
     }
     const find = this.eventsCollection.find(query).sort({ blockNumber: 1 })
