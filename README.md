@@ -47,7 +47,19 @@ To see the latest events (ordered by newest blocks):
 }
 ```
 
-We have implemented an example query to show how you can query the events in a way you can't directly on the blockchain.
+We have implemented example querys to show how you can query the events in a way you can't directly on the blockchain.
+To query all events by a given return value key/value:
+```
+{
+  returnValues (key: "kittyId", value: "5436") {
+    eventName
+    blockNumber
+    returnValues
+  }
+}
+```
+
+
 To see a history (birth, any transfers and any instance where it is a parent) for a given kittyId:
 ```
 {

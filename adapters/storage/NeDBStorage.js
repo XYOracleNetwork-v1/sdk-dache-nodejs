@@ -43,6 +43,13 @@ class NeDBStorage extends StorageInterface {
     return NeDBStorage.executeQuery(find)
   }
 
+  findByReturnValues (args) {
+    const query = {}
+    query[`returnValues.${args.key}`] = args.value
+    const find = this.eventsCollection.find(query).sort({ blockNumber: -1 })
+    return NeDBStorage.executeQuery(find)
+  }
+
   static executeQuery (query) {
     return new Promise((resolve, reject) => {
       query.exec((err, docs) => {

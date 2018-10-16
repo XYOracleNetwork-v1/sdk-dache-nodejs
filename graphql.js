@@ -22,6 +22,13 @@ const queryType = new graphql.GraphQLObjectType({
         limit: { type: graphql.GraphQLInt, defaultValue: 25 }
       }
     },
+    returnValues: {
+      type: new graphql.GraphQLList(EventType),
+      args: {
+        key: { type: graphql.GraphQLString },
+        value: { type: graphql.GraphQLString }
+      }
+    },
     kittyHistory: {
       type: new graphql.GraphQLList(EventType),
       args: {
@@ -37,5 +44,6 @@ module.exports.schema = new graphql.GraphQLSchema({
 
 module.exports.root = {
   latestEvents: args => storage.getLatestEvents(args),
+  returnValues: args => storage.findByReturnValues(args),
   kittyHistory: args => storage.getKittyHistory(args.kittyId)
 }

@@ -70,6 +70,17 @@ class PostgresStorage extends StorageInterface {
     return PostgresStorage.transformEvents(events)
   }
 
+  async findByReturnValues (args) {
+    const query = `
+        SELECT t.block_number, e.event_name, e.return_values
+        FROM blockchain_transactions t, blockchain_events e
+        WHERE t.transaction_hash = e.transaction_hash AND
+        (e.return_values->>'${args.key}' = $1
+        ORDER BY t.block_number;`
+    const events = await this.db.any(query, args.value)
+    return PostgresStorage.transformEvents(events)
+  }
+
   async getKittyHistory (kittyId) {
     const query = `
         SELECT t.block_number, e.event_name, e.return_values
