@@ -1,0 +1,17 @@
+{
+  "extends": ["airbnb", "standard"],
+  "env": {
+    "node": true,
+    "es6": true,
+    "mocha": true
+  },
+  "rules": {
+    "func-names": 0,
+    "quotes": [2, "backtick"],
+    "no-plusplus": 0,
+    "max-len": 0,
+    "no-console": 0,
+    "no-underscore-dangle": 0,
+    "no-param-reassign": ["error", { "props": false }]
+  }
+}

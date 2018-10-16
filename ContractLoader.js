@@ -1,23 +1,25 @@
-const fs = require('fs')
-const AWS = require('aws-sdk')
-const config = require('config')
-const s3 = new AWS.S3()
-const Contract = require('./Contract')
-const ipfsAPI = require('ipfs-api')
+const fs = require(`fs`)
+const AWS = require(`aws-sdk`)
+const config = require(`config`)
 
-const Web3 = require('web3')
+const s3 = new AWS.S3()
+const Contract = require(`./Contract`)
+const IpfsAPI = require(`ipfs-api`)
+
+const Web3 = require(`web3`)
+
 const web3 = {
-  http: new Web3(new Web3.providers.HttpProvider(config.get('ethereum.web3HttpUrl'))),
-  websocket: new Web3(new Web3.providers.WebsocketProvider(config.get('ethereum.web3WebsocketUrl')))
+  http: new Web3(new Web3.providers.HttpProvider(config.get(`ethereum.web3HttpUrl`))),
+  websocket: new Web3(new Web3.providers.WebsocketProvider(config.get(`ethereum.web3WebsocketUrl`)))
 }
 
 let load
 
-switch (config.get('contractSource.type')) {
-  case 'ipfs':
+switch (config.get(`contractSource.type`)) {
+  case `ipfs`:
     load = loadFromIpfs
     break
-  case 's3':
+  case `s3`:
     load = loadFromS3
     break
   default:
@@ -25,9 +27,9 @@ switch (config.get('contractSource.type')) {
 }
 
 exports.loadContracts = async () => {
-  const contractJsons = await load(web3)
+  const contractJsons = await load()
   const contracts = []
-  contractJsons.forEach(contractJson => {
+  contractJsons.forEach((contractJson) => {
     if (Contract.getAddressFromJson(contractJson) != null) {
       const contract = new Contract(web3, contractJson)
       if (contract.hasEvents()) {
@@ -36,18 +38,17 @@ exports.loadContracts = async () => {
     }
   })
   if (contracts.length === 0) {
-    throw new Error('Found no contracts to watch')
+    throw new Error(`Found no contracts to watch`)
   }
   return contracts
-
 }
 
-async function loadFromIpfs() {
-  const directoryHash = config.get('contractSource.directoryHash')
-  const ipfs = new ipfsAPI({
-    host: config.get('contractSource.host'),
-    port: config.get('contractSource.port'),
-    protocol: config.get('contractSource.protocol')
+async function loadFromIpfs () {
+  const directoryHash = config.get(`contractSource.directoryHash`)
+  const ipfs = new IpfsAPI({
+    host: config.get(`contractSource.host`),
+    port: config.get(`contractSource.port`),
+    protocol: config.get(`contractSource.protocol`)
   })
   return new Promise((resolve, reject) => {
     const contractJsons = []
@@ -55,36 +56,36 @@ async function loadFromIpfs() {
       if (err) {
         return reject(err)
       }
-      files.forEach(file => {
+      files.forEach((file) => {
         if (file.content) {
           contractJsons.push(JSON.parse(String(file.content)))
         }
       })
-      resolve(contractJsons)
+      return resolve(contractJsons)
     })
   })
 }
 
-function loadFromFilesystem(web3) {
-  const localDirectory = config.get('contractSource.directory')
+function loadFromFilesystem () {
+  const localDirectory = config.get(`contractSource.directory`)
 
   const contractJsons = []
-  fs.readdirSync(localDirectory).forEach(fileName => contractJsons.push(require(`${localDirectory}/${fileName}`)))
+  fs.readdirSync(localDirectory).forEach(fileName => contractJsons.push(JSON.parse(fs.readFileSync(`${localDirectory}/${fileName}`).toString())))
   if (contractJsons.length === 0) {
-    throw new Error('Found no contracts to load')
+    throw new Error(`Found no contracts to load`)
   }
   return contractJsons
 }
 
-async function loadFromS3(web3) {
-  const bucketName = config.get('contractSource.bucketName')
-  const keyPrefix = config.get('contractSource.keyPrefix')
+async function loadFromS3 () {
+  const bucketName = config.get(`contractSource.bucketName`)
+  const keyPrefix = config.get(`contractSource.keyPrefix`)
   const params = {
     Bucket: bucketName,
-    Prefix: keyPrefix,
+    Prefix: keyPrefix
   }
   return new Promise((resolve, reject) => {
-    s3.listObjects(params, async function (err, data) {
+    s3.listObjects(params, async (err, data) => {
       if (err) {
         reject(err)
       } else if (data.Contents && data.Contents.length > 0) {
@@ -96,25 +97,25 @@ async function loadFromS3(web3) {
         contractObjects.forEach(contractObject => contractJsons.push(JSON.parse(contractObject.Body.toString())))
         resolve(contractJsons)
       } else {
-        reject(`Found no contracts to load from bucket ${bucketName}, prefix ${keyPrefix}`)
+        reject(new Error(`Found no contracts to load from bucket ${bucketName}, prefix ${keyPrefix}`))
       }
     })
   })
 }
 
-async function getContractFromS3(bucketName, key) {
+async function getContractFromS3 (bucketName, key) {
   const params = {
     Bucket: bucketName,
     Key: key
   }
   return new Promise((resolve, reject) => {
-    s3.getObject(params, function (err, data) {
+    s3.getObject(params, (err, data) => {
       if (err) {
         reject(err)
       } else if (data) {
         resolve(data)
       } else {
-        reject(`Could not retrieve contract ${key} from bucket ${bucketName}`)
+        reject(new Error(`Could not retrieve contract ${key} from bucket ${bucketName}`))
       }
     })
   })
