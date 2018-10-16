@@ -13,7 +13,7 @@ class NeDBStorage extends StorageInterface {
     save(contractName, events, deleteExisting = false) {
         if (deleteExisting) {
             const transactionHashes = events.map(event => event.transactionHash);
-            eventsCollection.remove({transactionHash: {$in: transactionHashes}});
+            eventsCollection.remove({transactionHash: {$in: transactionHashes}}, {multi: true});
         }
         events.forEach(event => {
             event.contractName = contractName;
