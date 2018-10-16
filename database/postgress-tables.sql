@@ -3,7 +3,7 @@ create table blockchain_transactions
 	transaction_hash char(66) not null
 		constraint blockchain_transactions_transaction_hash_pk
 			primary key,
-	block_number bigint not null
+	block_number bigint
 )
 ;
 
