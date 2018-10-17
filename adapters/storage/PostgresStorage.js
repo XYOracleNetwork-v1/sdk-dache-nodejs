@@ -44,7 +44,7 @@ class PostgresStorage extends StorageInterface {
       let deleteTransactions
       if (deleteExisting) {
         const transactionHashes = events.map(event => event.transactionHash)
-        deleteTransactions = t.none(`DELETE FROM blockchain_transactions WHERE transaction_hash = ANY($1)`, [transactionHashes])
+        deleteTransactions = t.none(`DELETE FROM blockchain_transactions WHERE contract_name = $1 AND transaction_hash = ANY($2)`, [contractName, transactionHashes])
       }
 
       const insertTransactions = t.none(transactionQuery)
