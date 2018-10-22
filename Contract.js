@@ -9,6 +9,7 @@ const networks = {
 }
 
 const blockScanIncrement = config.get(`rebase.blockScanIncrement`)
+const maxListenerErrors = 10
 
 class Contract {
   constructor (web3, contractJson) {
@@ -24,6 +25,7 @@ class Contract {
       throw new Error(`Missing contractName in JSON`)
     }
     this.name = contractJson.contractName
+    this.errorCount = 0
   }
 
   static getNetworkFromJson (contractJson) {
@@ -54,9 +56,14 @@ class Contract {
     console.info(`${this.getLogPrefix()}: Listening for live events`)
 
     eventEmitter.on(`error`, (error) => {
+      this.errorCount++
       console.error(`${this.getLogPrefix()}: Error listening for events: ${error.message}, re-attaching listeners...`)
       eventEmitter.removeAllListeners()
-      this.listenForEvents()
+      if (this.errorCount < maxListenerErrors) {
+        this.listenForEvents()
+      } else {
+        console.error(`${this.getLogPrefix()}: Error listening for events: ${error.message}, max re-try limit hit.`)
+      }
     })
   }
 
@@ -86,6 +93,9 @@ class Contract {
       } catch (error) {
         console.error(`${this.getLogPrefix()}: Error from web3: ${error.message}. Trying again with lower increment.`)
         adjustableBlockScanIncrement = Math.ceil(adjustableBlockScanIncrement / 2)
+        if (adjustableBlockScanIncrement === 1) {
+          throw new Error(`${this.getLogPrefix()}: Block scan increment reached 1 after error, probably a problem with Web3`)
+        }
         toBlock -= adjustableBlockScanIncrement
       }
       if (events != null) {
@@ -109,43 +119,45 @@ class Contract {
   async scanBlocks (currentBlock) {
     const offset = config.get(`sync.blockScanOffset`)
     let running = false
-    let fromBlock = currentBlock + 1
+    let fromBlock = currentBlock
     this.web3.websocket.eth.subscribe(`newBlockHeaders`, (error, result) => {
       if (error) {
         console.log(error)
         process.exit(1)
       }
-    }).on(`data`, async (blockHeader) => {
-      if (!running) {
-        running = true
-        const toBlock = blockHeader.number - offset
-        if (toBlock > fromBlock) {
-          let events
-          try {
-            events = await this.contractHttp.getPastEvents(`allEvents`, {
-              fromBlock,
-              toBlock
-            })
-          } catch (error) {
-            console.error(`${this.getLogPrefix()}: Error from web3: ${error.message}`)
-          }
-          if (events != null) {
-            console.log(`${this.getLogPrefix()}: Scan: Found ${events.length} events in block range ${fromBlock} - ${toBlock}`)
+    })
+      .on(`data`, async (blockHeader) => {
+        if (!running) {
+          running = true
+          const toBlock = blockHeader.number - offset
+          if (toBlock > fromBlock) {
+            let events
             try {
-              if (events.length > 0) {
-                await storage.processEvents(this.name, events, true)
-              }
-              fromBlock = toBlock + 1
+              events = await this.contractHttp.getPastEvents(`allEvents`, {
+                fromBlock,
+                toBlock
+              })
             } catch (error) {
-              console.error(`${this.getLogPrefix()}: Error persisting events in scan: ${error.message}.`)
+              console.error(`${this.getLogPrefix()}: Error from web3: ${error.message}`)
+            }
+            if (events != null) {
+              console.log(`${this.getLogPrefix()}: Scan: Found ${events.length} events in block range ${fromBlock} - ${toBlock}`)
+              try {
+                if (events.length > 0) {
+                  await storage.processEvents(this.name, events, true)
+                }
+                fromBlock = toBlock + 1
+              } catch (error) {
+                console.error(`${this.getLogPrefix()}: Error persisting events in scan: ${error.message}.`)
+              }
             }
           }
+          running = false
         }
-        running = false
-      }
-    }).on(`error`, (error) => {
-      console.error(error)
-    })
+      })
+      .on(`error`, (error) => {
+        console.error(error)
+      })
   }
 
   getLogPrefix () {
