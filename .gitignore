@@ -64,3 +64,5 @@ typings/
 
 config/*
 !config/default.example.json
+
+contracts

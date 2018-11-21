@@ -9,7 +9,7 @@ class StorageInterface {
     throw new Error(`Not implemented`)
   }
 
-  getLatestEvents (args) {
+  getEvents (args) {
     throw new Error(`Not implemented`)
   }
 

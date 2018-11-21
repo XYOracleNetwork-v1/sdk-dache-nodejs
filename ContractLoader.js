@@ -29,10 +29,14 @@ switch (config.get(`contractSource.type`)) {
 exports.loadContracts = async () => {
   const contractJsons = await load()
   const contracts = []
+  let onlyLoadContracts
+  if (config.has(`contractSource.contracts`)) {
+    onlyLoadContracts = config.get(`contractSource.contracts`)
+  }
   contractJsons.forEach((contractJson) => {
     if (Contract.getAddressFromJson(contractJson) != null) {
       const contract = new Contract(web3, contractJson)
-      if (contract.hasEvents()) {
+      if (contract.hasEvents() && (!onlyLoadContracts || onlyLoadContracts.includes(contract.name))) {
         contracts.push(contract)
       }
     }
@@ -70,7 +74,9 @@ function loadFromFilesystem () {
   const localDirectory = config.get(`contractSource.directory`)
 
   const contractJsons = []
-  fs.readdirSync(localDirectory).forEach(fileName => contractJsons.push(JSON.parse(fs.readFileSync(`${localDirectory}/${fileName}`).toString())))
+  fs.readdirSync(localDirectory)
+    .forEach(fileName => contractJsons.push(JSON.parse(fs.readFileSync(`${localDirectory}/${fileName}`)
+      .toString())))
   if (contractJsons.length === 0) {
     throw new Error(`Found no contracts to load`)
   }

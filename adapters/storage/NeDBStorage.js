@@ -34,8 +34,15 @@ class NeDBStorage extends StorageInterface {
     return NeDBStorage.executeQuery(find)
   }
 
-  getLatestEvents (args) {
-    let find = this.eventsCollection.find().sort({ blockNumber: -1 })
+  getEvents (args) {
+    const query = {}
+    if (args.contractName) {
+      query.contractName = args.contractName
+    }
+    if (args.eventName) {
+      query.eventName = args.eventName
+    }
+    let find = this.eventsCollection.find(query).sort({ blockNumber: args.order })
     if (args.limit) {
       find = find.limit(args.limit)
     }

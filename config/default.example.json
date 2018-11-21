@@ -9,13 +9,16 @@
   },
   "contractSource": {
     "type": "local",
-    "directory": "./contracts"
+    "directory": "./examples/contracts",
+    "contracts": [
+      "CryptoKittiesCore"
+    ]
   },
   "rebase": {
     "enabled": false,
-    "blockScanIncrement": 1000
+    "blockScanIncrement": 5000
   },
-  "sync": {
+  "scan": {
     "blockScanOffset": 10
   }
 }

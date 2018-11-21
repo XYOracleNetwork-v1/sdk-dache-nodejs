@@ -1,3 +1,4 @@
+const { utils } = require(`web3`)
 const storage = require(`./storage.js`)()
 const config = require(`config`)
 
@@ -117,7 +118,7 @@ class Contract {
   }
 
   async scanBlocks (currentBlock) {
-    const offset = config.get(`sync.blockScanOffset`)
+    const offset = config.get(`scan.blockScanOffset`)
     let running = false
     let fromBlock = currentBlock
     this.web3.websocket.eth.subscribe(`newBlockHeaders`, (error, result) => {
@@ -158,6 +159,36 @@ class Contract {
       .on(`error`, (error) => {
         console.error(error)
       })
+  }
+
+  async getTokenBalances () {
+    const decimals = utils.toBN(await this.contractHttp.methods.decimals().call())
+    const events = await storage.getEvents({contractName: this.name, eventName: `Transfer`})
+    const zero = utils.toBN(0)
+    const balances = {}
+    events.forEach((event) => {
+      const { from, to } = event.returnValues
+      const value = utils.toBN(event.returnValues.value)
+      if (balances[to] == null) {
+        balances[to] = zero.clone()
+      }
+      if (balances[from] == null) {
+        balances[from] = zero.clone()
+      }
+      balances[from] = balances[from].sub(value)
+      balances[to] = balances[to].add(value)
+    })
+    const formattedBalances = {}
+    Object.keys(balances).forEach((addr) => {
+      const balance = balances[addr]
+      if (balance.gt(zero)) {
+        const divisor = utils.toBN(10).pow(decimals)
+        const beforeDecimal = balance.div(divisor)
+        const afterDecimal = balance.mod(divisor)
+        formattedBalances[addr] = `${beforeDecimal}.${afterDecimal}`
+      }
+    })
+    return formattedBalances
   }
 
   getLogPrefix () {

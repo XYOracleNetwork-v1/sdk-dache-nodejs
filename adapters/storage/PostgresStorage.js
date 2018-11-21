@@ -61,12 +61,22 @@ class PostgresStorage extends StorageInterface {
     })
   }
 
-  async getLatestEvents (args) {
-    const query = `
+  async getEvents (args) {
+    const queryArgs = [args.limit]
+    let query = `
         SELECT * FROM blockchain_transactions t, blockchain_events e
-        WHERE t.transaction_hash = e.transaction_hash
-        ORDER BY t.block_number DESC LIMIT $1`
-    const events = await this.db.any(query, args.limit)
+        WHERE t.transaction_hash = e.transaction_hash`
+    if(args.contractName) {
+      queryArgs.push(args.contractName)
+      query += ` AND contract_name = $${queryArgs.length}`
+    }
+    if(args.eventName) {
+      queryArgs.push(args.eventName)
+      query += ` AND event_name = $${queryArgs.length}`
+    }
+    const order = args.order === -1 ? `DESC` : `ASC`
+    const orderLimit = ` ORDER BY t.block_number ${order} LIMIT $1`
+    const events = await this.db.any(query + orderLimit, queryArgs)
     return PostgresStorage.transformEvents(events)
   }
 

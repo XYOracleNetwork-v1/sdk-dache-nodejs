@@ -26,20 +26,19 @@ Postgres is also supported, so if you prefer that fill out the storage section o
 }
 ```
 
-We have included the CryptoKittiesCore contract that you can watch live on the mainnet!
-
 To start dAche, `npm install` then `npm start`.
 
-## Querying
+## Example 1: Querying CryptoKittiesCore
 
 There is a simple GraphQL layer for the dAche API implemented.
 
 Visit http://localhost:4000/graphql to view the built-in GrapgQL query interface.
 
-To see the latest events (ordered by newest blocks):
+To see the latest events (ordered by newest blocks by default (order: -1):
 ```
 {
-  latestEvents {
+  events (limit: 10) {
+    contractName
     eventName
     blockNumber
     returnValues
@@ -47,7 +46,7 @@ To see the latest events (ordered by newest blocks):
 }
 ```
 
-We have implemented example querys to show how you can query the events in a way you can't directly on the blockchain.
+We have implemented example queries to show how you can query the events in a way you can't directly on the blockchain.
 To query all events by a given return value key/value:
 ```
 {
@@ -71,7 +70,16 @@ To see a history (birth, any transfers and any instance where it is a parent) fo
 }
 ```
 
-## Historic Events
+## Example 2: Generating a token holder balances report
+
+This is an example of a non-grapql use of the Dache. This is a GET endpoint that will return all current token holders of a token contract (a csv of address, balance). We have included the XYO Token contract as an example.
+
+Stop the dAche. Update the contractSource.contracts, replace CryptoKittiesCore with XYO. Change rebase.enabled to true. Start the dAche.
+
+Visit http://localhost:4000/balances/XYO and 
+
+
+## Historic Events (Rebase)
 
 By default, you will see `rebase.enabled` is turned off in the config file. If you enable this option, dAche will historically scan all events since contract creation and import them in. 
 
@@ -112,6 +120,15 @@ To use S3 to load contracts instead of a local directory, update the config to h
 }
 ```
 
-For the Scan component, you can adjust `sync.blockScanOffset`. This is how many blocks you want to wait before reimporting events that were picked up live.
+To only load specific contract(s) from a source, include the "contracts" key as noted below
+```
+  "contractSource": {
+    "type": "local",
+    "directory": "./examples/contracts",
+    "contracts": [
+      "CryptoKittiesCore"
+    ]
+  }
+```
 
-For the  
+For the Scan component, you can adjust `sync.blockScanOffset`. This is how many blocks you want to wait before reimporting events that were picked up live.
