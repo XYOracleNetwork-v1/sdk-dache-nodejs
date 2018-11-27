@@ -84,6 +84,16 @@ function loadFromFilesystem () {
 }
 
 async function loadFromS3 () {
+  const accessKeyId = config.get(`aws.accessKeyId`)
+  const secretAccessKey = config.get(`aws.secretAccessKey`)
+  const region = config.get(`aws.region`)
+  AWS.config.update(
+    {
+      accessKeyId,
+      secretAccessKey,
+      region
+    }
+  )
   const bucketName = config.get(`contractSource.bucketName`)
   const keyPrefix = config.get(`contractSource.keyPrefix`)
   const params = {
