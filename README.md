@@ -132,3 +132,6 @@ To only load specific contract(s) from a source, include the "contracts" key as 
 ```
 
 For the Scan component, you can adjust `sync.blockScanOffset`. This is how many blocks you want to wait before reimporting events that were picked up live.
+
+<br><hr><br>
+<p align="center">Made with  ❤️  by [<b>XY - The Persistent Company</b>] (https://xy.company)</p>
