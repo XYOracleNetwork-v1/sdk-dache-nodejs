@@ -21,19 +21,6 @@ class NeDBStorage extends StorageInterface {
     this.eventsCollection.insert(events)
   }
 
-  getKittyHistory (kittyId) {
-    const query = {
-      $or: [
-        { 'returnValues.kittyId': kittyId },
-        { 'returnValues.matronId': kittyId },
-        { 'returnValues.sireId': kittyId },
-        { 'returnValues.tokenId': kittyId }
-      ]
-    }
-    const find = this.eventsCollection.find(query).sort({ blockNumber: 1 })
-    return NeDBStorage.executeQuery(find)
-  }
-
   static async getPaginationFromQuery (collection, query, page, perPage) {
     const skip = page * perPage
     const count = await NeDBStorage.count(collection, query)
@@ -41,9 +28,10 @@ class NeDBStorage extends StorageInterface {
     return { skip, numPages, count }
   }
 
-  async getEvents ({
-    contractName, eventName, page, perPage, order
-  }) {
+  async getEvents (args) {
+    const {
+      contractName, eventName, page, perPage, order, returnValuesKey, returnValuesValue
+    } = args
     const query = {}
     if (contractName) {
       query.contractName = contractName
@@ -51,19 +39,15 @@ class NeDBStorage extends StorageInterface {
     if (eventName) {
       query.eventName = eventName
     }
+    if (returnValuesKey && returnValuesValue) {
+      query[`returnValues.${returnValuesKey}`] = returnValuesValue
+    }
     const { skip, numPages, count } = await NeDBStorage.getPaginationFromQuery(this.eventsCollection, query, page, perPage)
     const find = this.eventsCollection.find(query).sort({ blockNumber: order }).skip(skip).limit(perPage)
     return {
       items: await NeDBStorage.executeQuery(find),
       pagination: NeDBStorage.getPagination(page, numPages, count)
     }
-  }
-
-  findByReturnValues (args) {
-    const query = {}
-    query[`returnValues.${args.key}`] = args.value
-    const find = this.eventsCollection.find(query).sort({ blockNumber: -1 })
-    return NeDBStorage.executeQuery(find)
   }
 
   static executeQuery (query) {

@@ -7,10 +7,8 @@ type Query {
         page: Int = 0
         contractName: String
         eventName: String
-        order: Int = -1
-    ): EventList
-    returnValues(
-        key: String
-        value: String
+        order: Int = -1,
+        returnValuesKey: String
+        returnValuesValue: String
     ): EventList
 }

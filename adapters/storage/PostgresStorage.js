@@ -1,10 +1,63 @@
 const config = require(`config`)
-
-const pgp = require(`pg-promise`)()
 const StorageInterface = require(`./StorageInterface.js`)
 
-const transactionColumnSet = new pgp.helpers.ColumnSet([`transaction_hash`, `block_number`], { table: `blockchain_transactions` })
-const eventColumnSet = new pgp.helpers.ColumnSet([`contract_name`, `event_name`, `log_index`, `event`, `transaction_hash`, `return_values`], { table: `blockchain_events` })
+const pgOptions = {
+  capSQL: true,
+  receive: (data, result, e) => {
+    camelizeColumns(data)
+  }
+}
+
+const pgp = require(`pg-promise`)(pgOptions)
+
+const camelizeColumns = (data) => {
+  const template = data[0]
+  if (!template) {
+    return
+  }
+  Object.keys(template).forEach((prop) => {
+    const camel = pgp.utils.camelize(prop)
+    if (!(camel in template)) {
+      for (let i = 0; i < data.length; i++) {
+        const d = data[i]
+        d[camel] = d[prop]
+        delete d[prop]
+      }
+    }
+  })
+}
+
+const transactionColumnSet = new pgp.helpers.ColumnSet([
+  {
+    name: `transaction_hash`,
+    prop: `transactionHash`
+  },
+  {
+    name: `block_number`,
+    prop: `blockNumber`
+  }], { table: `blockchain_transactions` })
+
+const eventColumnSet = new pgp.helpers.ColumnSet([
+  {
+    name: `contract_name`,
+    prop: `contractName`
+  },
+  {
+    name: `event_name`,
+    prop: `eventName`
+  },
+  {
+    name: `log_index`,
+    prop: `logIndex`
+  },
+  {
+    name: `transaction_hash`,
+    prop: `transactionHash`
+  },
+  {
+    name: `return_values`,
+    prop: `returnValues`
+  }], { table: `blockchain_events` })
 
 class PostgresStorage extends StorageInterface {
   constructor () {
@@ -19,40 +72,26 @@ class PostgresStorage extends StorageInterface {
   }
 
   async save (contractName, events, deleteExisting = false) {
-    const transactionRows = []
-    const eventRows = []
-
     events.forEach((event) => {
-      transactionRows.push({
-        transaction_hash: event.transactionHash,
-        block_number: event.blockNumber
-      })
-      eventRows.push({
-        contract_name: contractName,
-        event_name: event.event,
-        log_index: event.logIndex,
-        event,
-        transaction_hash: event.transactionHash,
-        return_values: event.returnValues
-      })
+      event.contractName = contractName
+      event.eventName = event.event
     })
-
     return this.db.tx((t) => {
-      const transactionQuery = `${pgp.helpers.insert(transactionRows, transactionColumnSet)}ON CONFLICT ON CONSTRAINT blockchain_transactions_transaction_hash_pk DO NOTHING`
-      const eventQuery = `${pgp.helpers.insert(eventRows, eventColumnSet)}ON CONFLICT ON CONSTRAINT blockchain_events_transaction_hash_log_index_pk DO NOTHING`
+      const transactionQuery = `${pgp.helpers.insert(events, transactionColumnSet)} ON CONFLICT ON CONSTRAINT blockchain_transactions_transaction_hash_pk DO NOTHING`
+      const eventQuery = `${pgp.helpers.insert(events, eventColumnSet)} ON CONFLICT ON CONSTRAINT blockchain_events_transaction_hash_log_index_pk DO NOTHING`
 
-      let deleteTransactions
+      let deleteEvents
       if (deleteExisting) {
         const transactionHashes = events.map(event => event.transactionHash)
-        deleteTransactions = t.none(`DELETE FROM blockchain_transactions WHERE contract_name = $1 AND transaction_hash = ANY($2)`, [contractName, transactionHashes])
+        deleteEvents = t.none(`DELETE FROM blockchain_events WHERE transaction_hash = ANY($1)`, [transactionHashes])
       }
 
       const insertTransactions = t.none(transactionQuery)
       const insertEvents = t.none(eventQuery)
 
       const queries = []
-      if (deleteTransactions) {
-        queries.push(deleteTransactions)
+      if (deleteEvents) {
+        queries.push(deleteEvents)
       }
       queries.push(insertTransactions)
       queries.push(insertEvents)
@@ -62,58 +101,40 @@ class PostgresStorage extends StorageInterface {
   }
 
   async getEvents (args) {
-    const queryArgs = [args.limit]
-    let query = `
-        SELECT * FROM blockchain_transactions t, blockchain_events e
-        WHERE t.transaction_hash = e.transaction_hash`
-    if(args.contractName) {
-      queryArgs.push(args.contractName)
-      query += ` AND contract_name = $${queryArgs.length}`
+    const {
+      contractName, eventName, page, perPage, order, returnValuesKey, returnValuesValue
+    } = args
+    let query = `WHERE t.transaction_hash = e.transaction_hash`
+    if (contractName) {
+      query += ` AND contract_name = $(contractName)`
     }
-    if(args.eventName) {
-      queryArgs.push(args.eventName)
-      query += ` AND event_name = $${queryArgs.length}`
+    if (eventName) {
+      query += ` AND event_name = $(eventName)`
     }
-    const order = args.order === -1 ? `DESC` : `ASC`
-    const orderLimit = ` ORDER BY t.block_number ${order} LIMIT $1`
-    const events = await this.db.any(query + orderLimit, queryArgs)
-    return PostgresStorage.transformEvents(events)
+    if (returnValuesKey && returnValuesValue) {
+      query += ` AND e.return_values->>$(returnValuesKey) = $(returnValuesValue)`
+    }
+    const tables = `blockchain_transactions t, blockchain_events e`
+    const { skip, numPages, count } = await this.getPaginationFromQuery(tables, query, page, perPage, args)
+    const orderLimit = ` ORDER BY t.block_number ${order === -1 ? `DESC` : `ASC`} OFFSET $(skip) LIMIT ${perPage}`
+    const queryParams = { skip }
+    Object.assign(queryParams, args)
+    return {
+      items: await this.db.any(`SELECT * FROM ${tables} ${query} ${orderLimit}`, queryParams),
+      pagination: PostgresStorage.getPagination(page, numPages, count)
+    }
   }
 
-  async findByReturnValues (args) {
-    const query = `
-        SELECT t.block_number, e.event_name, e.return_values
-        FROM blockchain_transactions t, blockchain_events e
-        WHERE t.transaction_hash = e.transaction_hash AND
-        (e.return_values->>'${args.key}' = $1
-        ORDER BY t.block_number;`
-    const events = await this.db.any(query, args.value)
-    return PostgresStorage.transformEvents(events)
-  }
-
-  async getKittyHistory (kittyId) {
-    const query = `
-        SELECT t.block_number, e.event_name, e.return_values
-        FROM blockchain_transactions t, blockchain_events e
-        WHERE t.transaction_hash = e.transaction_hash AND
-        (e.return_values->>'kittyId' = $1 OR
-         e.return_values->>'matronId' = $1 OR
-         e.return_values->>'sireId' = $1 OR
-         e.return_values->>'tokenId' = $1)
-        ORDER BY t.block_number;`
-    const events = await this.db.any(query, kittyId)
-    return PostgresStorage.transformEvents(events)
-  }
-
-  static transformEvents (events) {
-    events.forEach((event) => {
-      Object.keys(event).forEach((key) => {
-        const camelCasedKey = key.replace(/_([a-z])/g, g => g[1].toUpperCase())
-        event[camelCasedKey] = event[key]
-        delete event[key]
-      })
-    })
-    return events
+  async getPaginationFromQuery (table, query, page, perPage, queryParams) {
+    const skip = page * perPage
+    const countResult = await this.db.one(`SELECT count(*) as count FROM ${table} ${query}`, queryParams)
+    const { count } = countResult
+    const numPages = Math.ceil(count / perPage)
+    return {
+      skip,
+      numPages,
+      count
+    }
   }
 }
 

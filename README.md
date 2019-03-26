@@ -37,11 +37,13 @@ Visit http://localhost:4000/graphql to view the built-in GrapgQL query interface
 To see the latest events (ordered by newest blocks by default (order: -1):
 ```
 {
-  events (limit: 10) {
-    contractName
-    eventName
-    blockNumber
-    returnValues
+  events {
+    items {
+      contractName
+      eventName
+      blockNumber
+      returnValues
+    }
   }
 }
 ```
@@ -50,22 +52,15 @@ We have implemented example queries to show how you can query the events in a wa
 To query all events by a given return value key/value:
 ```
 {
-  returnValues (key: "kittyId", value: "5436") {
-    eventName
-    blockNumber
-    returnValues
-  }
-}
-```
-
-
-To see a history (birth, any transfers and any instance where it is a parent) for a given kittyId:
-```
-{
-  kittyHistory(kittyId: "1047") {
-    eventName
-    blockNumber
-    returnValues
+  events (
+    returnValuesKey: "kittyId", 
+    returnValuesValue: "5436") {
+    items {
+      contractName
+      eventName
+      blockNumber
+      returnValues
+    }
   }
 }
 ```
