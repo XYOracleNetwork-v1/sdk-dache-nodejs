@@ -34,19 +34,29 @@ class NeDBStorage extends StorageInterface {
     return NeDBStorage.executeQuery(find)
   }
 
-  getEvents (args) {
+  static async getPaginationFromQuery (collection, query, page, perPage) {
+    const skip = page * perPage
+    const count = await NeDBStorage.count(collection, query)
+    const numPages = Math.ceil(count / perPage)
+    return { skip, numPages, count }
+  }
+
+  async getEvents ({
+    contractName, eventName, page, perPage, order
+  }) {
     const query = {}
-    if (args.contractName) {
-      query.contractName = args.contractName
+    if (contractName) {
+      query.contractName = contractName
     }
-    if (args.eventName) {
-      query.eventName = args.eventName
+    if (eventName) {
+      query.eventName = eventName
     }
-    let find = this.eventsCollection.find(query).sort({ blockNumber: args.order })
-    if (args.limit) {
-      find = find.limit(args.limit)
+    const { skip, numPages, count } = await NeDBStorage.getPaginationFromQuery(this.eventsCollection, query, page, perPage)
+    const find = this.eventsCollection.find(query).sort({ blockNumber: order }).skip(skip).limit(perPage)
+    return {
+      items: await NeDBStorage.executeQuery(find),
+      pagination: NeDBStorage.getPagination(page, numPages, count)
     }
-    return NeDBStorage.executeQuery(find)
   }
 
   findByReturnValues (args) {
@@ -63,6 +73,18 @@ class NeDBStorage extends StorageInterface {
           reject(err)
         } else {
           resolve(docs)
+        }
+      })
+    })
+  }
+
+  static count (collection, query) {
+    return new Promise((resolve, reject) => {
+      collection.count(query, (err, count) => {
+        if (err) {
+          reject(err)
+        } else {
+          resolve(count)
         }
       })
     })

@@ -1,0 +1,16 @@
+# import EventList from "eventlist.graphql"
+
+scalar JSON
+
+type Query {
+    events(perPage: Int = 10
+        page: Int = 0
+        contractName: String
+        eventName: String
+        order: Int = -1
+    ): EventList
+    returnValues(
+        key: String
+        value: String
+    ): EventList
+}

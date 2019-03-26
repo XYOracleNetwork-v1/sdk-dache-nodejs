@@ -1,5 +1,4 @@
 const express = require(`express`)
-const graphqlHTTP = require(`express-graphql`)
 const graphql = require(`./graphql.js`)
 
 const ContractLoader = require(`./ContractLoader.js`)
@@ -8,7 +7,7 @@ const contracts = {}
 
 ContractLoader.loadContracts().then((loadedContracts) => {
   loadedContracts.forEach((contract) => {
-    // contract.listenForEvents()
+    contract.listenForEvents()
     contract.sync()
     contracts[contract.name] = contract
   })
@@ -18,11 +17,8 @@ ContractLoader.loadContracts().then((loadedContracts) => {
 })
 
 const app = express()
-app.use(`/graphql`, graphqlHTTP({
-  schema: graphql.schema,
-  rootValue: graphql.root,
-  graphiql: true
-}))
+
+graphql(app)
 
 app.get(`/balances/:contractName`, async (req, res) => {
   const balances = await contracts[req.params.contractName].getTokenBalances()
