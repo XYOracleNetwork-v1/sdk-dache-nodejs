@@ -1,5 +1,8 @@
 const express = require(`express`)
+const config = require(`config`)
 const graphql = require(`./graphql.js`)
+
+const port = config.get(`port`)
 
 const ContractLoader = require(`./ContractLoader.js`)
 
@@ -30,6 +33,6 @@ app.get(`/balances/:contractName`, async (req, res) => {
   res.send(csv)
 })
 
-app.listen(4000, () => {
-  console.log(`Running a GraphQL API server on port 4000`)
+app.listen(port, () => {
+  console.log(`Running a GraphQL API server on port ${port}`)
 })
