@@ -1,5 +1,6 @@
 const express = require(`express`)
 const config = require(`config`)
+const cors = require(`cors`)
 const graphql = require(`./graphql.js`)
 
 const port = config.get(`port`)
@@ -20,6 +21,8 @@ ContractLoader.loadContracts().then((loadedContracts) => {
 })
 
 const app = express()
+
+app.use(cors())
 
 graphql(app)
 

@@ -27,6 +27,7 @@
   "dependencies": {
     "aws-sdk": "^2.426.0",
     "config": "^2.0.2",
+    "cors": "^2.8.5",
     "express": "^4.16.4",
     "express-graphql": "^0.6.12",
     "graphql": "^14.1.1",
