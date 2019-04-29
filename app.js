@@ -11,8 +11,7 @@ const contracts = {}
 
 ContractLoader.loadContracts().then((loadedContracts) => {
   loadedContracts.forEach((contract) => {
-    contract.listenForEvents()
-    contract.sync()
+    contract.initialize()
     contracts[contract.name] = contract
   })
 }).catch((error) => {

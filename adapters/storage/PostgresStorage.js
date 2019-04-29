@@ -115,7 +115,7 @@ class PostgresStorage extends StorageInterface {
       query += ` AND e.return_values->>$(returnValuesKey) = $(returnValuesValue)`
     }
     const tables = `blockchain_transactions t, blockchain_events e`
-    const { skip, numPages, count } = await this.getPaginationFromQuery(tables, query, page, perPage, args)
+    const { skip, numPages, count } = await this.getPaginationFromQuery(`SELECT count(*)`, tables, query, page, perPage, args)
     const orderLimit = ` ORDER BY t.block_number ${order === -1 ? `DESC` : `ASC`} OFFSET $(skip) LIMIT ${perPage}`
     const queryParams = { skip }
     Object.assign(queryParams, args)
@@ -125,9 +125,55 @@ class PostgresStorage extends StorageInterface {
     }
   }
 
-  async getPaginationFromQuery (table, query, page, perPage, queryParams) {
+  async getAggregate (args) {
+    const {
+      contractName, eventName, page, perPage, returnValuesKey, returnValuesValue
+    } = args
+    let query = `WHERE t.transaction_hash = e.transaction_hash`
+    if (contractName) {
+      query += ` AND e.contract_name = $(contractName)`
+    }
+    if (eventName) {
+      query += ` AND e.event_name = $(eventName)`
+    }
+    if (returnValuesKey && returnValuesValue) {
+      query += ` AND e.return_values->>$(returnValuesKey) = $(returnValuesValue)`
+    }
+    const tables = `blockchain_transactions t, blockchain_events e`
+    const { skip, numPages, count } = await this.getPaginationFromQuery(`SELECT count(DISTINCT e.return_values->>$(aggregateByReturnValueKey))`, tables, query, page, perPage, args)
+    const orderLimit = ` GROUP BY e.return_values->>$(aggregateByReturnValueKey) OFFSET $(skip) LIMIT ${perPage}`
+    const queryParams = { skip }
+    Object.assign(queryParams, args)
+    const results = await this.db.any(`SELECT e.return_values->>$(aggregateByReturnValueKey) as value,
+       json_agg(json_build_object('block_number', t.block_number, 'event', e.*)
+           ORDER BY t.block_number ASC) as events FROM ${tables} ${query} ${orderLimit}`, queryParams)
+    const items = []
+    results.forEach((result) => {
+      const events = []
+      const agg = {
+        value: result.value,
+        events
+      }
+      result.events.forEach((event) => {
+        const camelizedEvent = {
+          blockNumber: event.block_number
+        }
+        Object.keys(event.event).forEach((eventKey) => {
+          camelizedEvent[pgp.utils.camelize(eventKey)] = event.event[eventKey]
+        })
+        events.push(camelizedEvent)
+      })
+      items.push(agg)
+    })
+    return {
+      items,
+      pagination: PostgresStorage.getPagination(page, numPages, count)
+    }
+  }
+
+  async getPaginationFromQuery (select, table, query, page, perPage, queryParams) {
     const skip = page * perPage
-    const countResult = await this.db.one(`SELECT count(*) as count FROM ${table} ${query}`, queryParams)
+    const countResult = await this.db.one(`${select} FROM ${table} ${query}`, queryParams)
     const { count } = countResult
     const numPages = Math.ceil(count / perPage)
     return {

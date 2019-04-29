@@ -13,6 +13,10 @@ class StorageInterface {
     throw new Error(`Not implemented`)
   }
 
+  getAggregate (args) {
+    throw new Error(`Not implemented`)
+  }
+
   findByReturnValues (args) {
     throw new Error(`Not implemented`)
   }

@@ -68,12 +68,17 @@ class Contract {
     })
   }
 
-  async sync () {
+  async initialize () {
     const currentBlock = await this.web3.http.eth.getBlockNumber()
     if (config.get(`rebase.enabled`) === true) {
       this.rebase(currentBlock)
     }
-    this.scanBlocks(currentBlock)
+    if (config.get(`scan.enabled`) === true) {
+      this.scanBlocks(currentBlock)
+    }
+    if (config.get(`listen.enabled`) === true) {
+      this.listenForEvents()
+    }
   }
 
   async rebase (currentBlock) {

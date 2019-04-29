@@ -1,0 +1,6 @@
+# import Event from "event.graphql"
+
+type EventAggregate {
+    value: String
+    events: [Event]
+}

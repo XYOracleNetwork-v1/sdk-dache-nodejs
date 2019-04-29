@@ -5,7 +5,8 @@ const storage = require(`./storage.js`)()
 
 const resolvers = {
   Query: {
-    events: (obj, args, context, info) => storage.getEvents(args)
+    events: (obj, args, context, info) => storage.getEvents(args),
+    aggregate: (obj, args, context, info) => storage.getAggregate(args)
   }
 }
 

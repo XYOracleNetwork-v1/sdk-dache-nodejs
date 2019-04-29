@@ -1,4 +1,5 @@
 # import EventList from "eventlist.graphql"
+# import EventAggregateList from "eventaggregatelist.graphql"
 
 scalar JSON
 
@@ -11,4 +12,13 @@ type Query {
         returnValuesKey: String
         returnValuesValue: String
     ): EventList
+    aggregate(
+        aggregateByReturnValueKey: String
+        perPage: Int = 10
+        page: Int = 0
+        contractName: String
+        eventName: String
+        returnValuesKey: String
+        returnValuesValue: String
+    ): EventAggregateList
 }

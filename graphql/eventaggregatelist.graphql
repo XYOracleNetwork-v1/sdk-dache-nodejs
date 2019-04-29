@@ -1,0 +1,7 @@
+# import EventAggregate from "eventaggregate.graphql"
+# import Pagination from "pagination.graphql"
+
+type EventAggregateList {
+    items: [EventAggregate]
+    pagination: Pagination
+}
