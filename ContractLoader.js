@@ -34,10 +34,12 @@ exports.loadContracts = async () => {
     onlyLoadContracts = config.get(`contractSource.contracts`)
   }
   contractJsons.forEach((contractJson) => {
-    if (Contract.getAddressFromJson(contractJson) != null) {
+    if (Contract.getAddressFromJson(contractJson) != null &&
+      Contract.getTransactionHashFromJson(contractJson) != null) {
       const contract = new Contract(web3, contractJson)
       if (contract.hasEvents() && (!onlyLoadContracts || onlyLoadContracts.includes(contract.name))) {
         contracts.push(contract)
+        console.log(`Loaded ${contract.name}`)
       }
     }
   })
