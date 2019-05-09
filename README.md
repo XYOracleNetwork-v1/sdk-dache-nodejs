@@ -1,4 +1,14 @@
+[logo]: https://cdn.xy.company/img/brand/XY_Logo_GitHub.png
+
+![logo]
+
 # dAche
+
+[![NPM](https://nodei.co/npm/@xyo-network/dache.png)](https://nodei.co/npm/@xyo-network/dache/) 
+
+[![Known Vulnerabilities](https://snyk.io/test/github/XYOracleNetwork/sdk-dache-nodejs/badge.svg)](https://snyk.io/test/github/XYOracleNetwork/sdk-dache-nodejs) [![David Badge](https://david-dm.org/xyoraclenetwork/sdk-dache-nodejs/status.svg)](https://david-dm.org/xyoraclenetwork/sdk-dache-nodejs) [![David Badge](https://david-dm.org/xyoraclenetwork/sdk-dache-nodejs/dev-status.svg)](https://david-dm.org/xyoraclenetwork/sdk-dache-nodejs)
+
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/1f31c7fa87694b8eab91a2d71f74b697)](https://www.codacy.com/app/arietrouw/sdk-dache-nodejs?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=XYOracleNetwork/sdk-dache-nodejs&amp;utm_campaign=Badge_Grade) [![Maintainability](https://api.codeclimate.com/v1/badges/f3dd4f4d35e1bd9eeabc/maintainability)](https://codeclimate.com/github/XYOracleNetwork/sdk-dache-nodejs/maintainability) [![BCH compliance](https://bettercodehub.com/edge/badge/XYOracleNetwork/sdk-dache-nodejs?branch=master)](https://bettercodehub.com/)
 
 An ethereum smart contract event cache. Query your smart contract events in ways that you can't do directly on the blockchain. A helpful development tool or a helpful addition to your production Dapp.
 
