@@ -6,4 +6,3 @@ addons:
     organization: xyo-network
 script: 
   - sonar-scanner
-  - npm run start
