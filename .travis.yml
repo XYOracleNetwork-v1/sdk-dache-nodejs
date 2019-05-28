@@ -1,0 +1,9 @@
+language: node_js
+node_js:
+  - "10"
+addons:
+  sonarcloud:
+    organization: xyo-network
+script: 
+  - sonar-scanner
+  - npm run start
