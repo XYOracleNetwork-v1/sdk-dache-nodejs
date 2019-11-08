@@ -1,12 +1,26 @@
-[logo]: https://cdn.xy.company/img/brand/XY_Logo_GitHub.png
+[logo]: https://cdn.xy.company/img/brand/XYO_full_colored.png
 
-![logo]
+[![logo]](https://xyo.network)
 
 # dAche
 
 [![Build Status](https://travis-ci.com/XYOracleNetwork/sdk-dache-nodejs.svg?branch=develop)](https://travis-ci.com/XYOracleNetwork/sdk-dache-nodejs) [![Known Vulnerabilities](https://snyk.io/test/github/XYOracleNetwork/sdk-dache-nodejs/badge.svg)](https://snyk.io/test/github/XYOracleNetwork/sdk-dache-nodejs) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/1f31c7fa87694b8eab91a2d71f74b697)](https://www.codacy.com/app/arietrouw/sdk-dache-nodejs?utm_source=github.com&utm_medium=referral&utm_content=XYOracleNetwork/sdk-dache-nodejs&utm_campaign=Badge_Grade) [![Maintainability](https://api.codeclimate.com/v1/badges/f3dd4f4d35e1bd9eeabc/maintainability)](https://codeclimate.com/github/XYOracleNetwork/sdk-dache-nodejs/maintainability) [![BCH compliance](https://bettercodehub.com/edge/badge/XYOracleNetwork/sdk-dache-nodejs?branch=master)](https://bettercodehub.com/)
 
+## Table of Contents
+
+-   [Title](#dAche)
+-   [Description](#description)
+-   [dAche event tracking](#dache-event-tracking)
+-   [Setup](#setup)
+-   [Maintainers](#maintainers)
+-   [License](#license)
+-   [Credits](#credits)
+
+## Description
+
 An ethereum smart contract event cache. Query your smart contract events in ways that you can't do directly on the blockchain. A helpful development tool or a helpful addition to your production Dapp.
+
+## dAche event tracking
 
 There are three components that dAche uses to track events:
 
@@ -128,10 +142,15 @@ To only load specific contract(s) from a source, include the "contracts" key as 
 
 For the Scan component, you can adjust `sync.blockScanOffset`. This is how many blocks you want to wait before reimporting events that were picked up live.
 
+## Maintainers
+
+- Arie Trouw
+
 ## License
 
-See the [LICENSE.md](LICENSE) file for license details.
+See the [LICENSE](LICENSE) file for license details.
 
 ## Credits
 
-Made with 🔥and ❄️ by [XY - The Persistent Company](https://www.xy.company)
+Made with 🔥and ❄️ by [XYO](https://www.xyo.network)
+
