@@ -1,6 +1,9 @@
 const express = require(`express`)
-const graphqlHTTP = require(`express-graphql`)
+const config = require(`config`)
+const cors = require(`cors`)
 const graphql = require(`./graphql.js`)
+
+const port = config.get(`port`)
 
 const ContractLoader = require(`./ContractLoader.js`)
 
@@ -8,8 +11,7 @@ const contracts = {}
 
 ContractLoader.loadContracts().then((loadedContracts) => {
   loadedContracts.forEach((contract) => {
-    // contract.listenForEvents()
-    contract.sync()
+    contract.initialize()
     contracts[contract.name] = contract
   })
 }).catch((error) => {
@@ -18,11 +20,10 @@ ContractLoader.loadContracts().then((loadedContracts) => {
 })
 
 const app = express()
-app.use(`/graphql`, graphqlHTTP({
-  schema: graphql.schema,
-  rootValue: graphql.root,
-  graphiql: true
-}))
+
+app.use(cors())
+
+graphql(app)
 
 app.get(`/balances/:contractName`, async (req, res) => {
   const balances = await contracts[req.params.contractName].getTokenBalances()
@@ -34,6 +35,6 @@ app.get(`/balances/:contractName`, async (req, res) => {
   res.send(csv)
 })
 
-app.listen(4000, () => {
-  console.log(`Running a GraphQL API server on port 4000`)
+app.listen(port, () => {
+  console.log(`Running a GraphQL API server on port ${port}`)
 })

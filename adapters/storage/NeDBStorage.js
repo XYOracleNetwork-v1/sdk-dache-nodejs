@@ -21,39 +21,33 @@ class NeDBStorage extends StorageInterface {
     this.eventsCollection.insert(events)
   }
 
-  getKittyHistory (kittyId) {
-    const query = {
-      $or: [
-        { 'returnValues.kittyId': kittyId },
-        { 'returnValues.matronId': kittyId },
-        { 'returnValues.sireId': kittyId },
-        { 'returnValues.tokenId': kittyId }
-      ]
-    }
-    const find = this.eventsCollection.find(query).sort({ blockNumber: 1 })
-    return NeDBStorage.executeQuery(find)
+  static async getPaginationFromQuery (collection, query, page, perPage) {
+    const skip = page * perPage
+    const count = await NeDBStorage.count(collection, query)
+    const numPages = Math.ceil(count / perPage)
+    return { skip, numPages, count }
   }
 
-  getEvents (args) {
+  async getEvents (args) {
+    const {
+      contractName, eventName, page, perPage, order, returnValuesKey, returnValuesValue
+    } = args
     const query = {}
-    if (args.contractName) {
-      query.contractName = args.contractName
+    if (contractName) {
+      query.contractName = contractName
     }
-    if (args.eventName) {
-      query.eventName = args.eventName
+    if (eventName) {
+      query.eventName = eventName
     }
-    let find = this.eventsCollection.find(query).sort({ blockNumber: args.order })
-    if (args.limit) {
-      find = find.limit(args.limit)
+    if (returnValuesKey && returnValuesValue) {
+      query[`returnValues.${returnValuesKey}`] = returnValuesValue
     }
-    return NeDBStorage.executeQuery(find)
-  }
-
-  findByReturnValues (args) {
-    const query = {}
-    query[`returnValues.${args.key}`] = args.value
-    const find = this.eventsCollection.find(query).sort({ blockNumber: -1 })
-    return NeDBStorage.executeQuery(find)
+    const { skip, numPages, count } = await NeDBStorage.getPaginationFromQuery(this.eventsCollection, query, page, perPage)
+    const find = this.eventsCollection.find(query).sort({ blockNumber: order }).skip(skip).limit(perPage)
+    return {
+      items: await NeDBStorage.executeQuery(find),
+      pagination: NeDBStorage.getPagination(page, numPages, count)
+    }
   }
 
   static executeQuery (query) {
@@ -63,6 +57,18 @@ class NeDBStorage extends StorageInterface {
           reject(err)
         } else {
           resolve(docs)
+        }
+      })
+    })
+  }
+
+  static count (collection, query) {
+    return new Promise((resolve, reject) => {
+      collection.count(query, (err, count) => {
+        if (err) {
+          reject(err)
+        } else {
+          resolve(count)
         }
       })
     })

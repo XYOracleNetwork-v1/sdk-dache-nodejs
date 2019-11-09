@@ -1,0 +1,7 @@
+type Pagination {
+    current: Int
+    next: Int
+    previous: Int
+    numPages: Int
+    count: Int
+}

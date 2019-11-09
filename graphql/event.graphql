@@ -1,0 +1,7 @@
+type Event {
+    transactionHash: String
+    contractName: String
+    eventName: String
+    blockNumber: Int
+    returnValues: JSON
+}

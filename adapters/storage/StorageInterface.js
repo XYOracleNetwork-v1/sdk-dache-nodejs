@@ -13,12 +13,26 @@ class StorageInterface {
     throw new Error(`Not implemented`)
   }
 
+  getAggregate (args) {
+    throw new Error(`Not implemented`)
+  }
+
   findByReturnValues (args) {
     throw new Error(`Not implemented`)
   }
 
   getKittyHistory (kittyId) {
     throw new Error(`Not implemented`)
+  }
+
+  static getPagination (page, numPages, count) {
+    return {
+      current: page,
+      previous: page > 0 ? page - 1 : undefined,
+      next: page < numPages - 1 ? page + 1 : undefined,
+      numPages,
+      count
+    }
   }
 
   static removeRedundantReturnValues (event) {
