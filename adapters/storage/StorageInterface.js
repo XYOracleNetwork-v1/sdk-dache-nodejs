@@ -35,7 +35,6 @@ class StorageInterface {
     }
   }
 
-
   static removeRedundantReturnValues (event) {
     for (let i = 0; i < Object.keys(event.returnValues).length; i++) {
       delete event.returnValues[i]
