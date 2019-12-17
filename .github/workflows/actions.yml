@@ -21,5 +21,3 @@ jobs:
         yarn install
       env:
         CI: true
-    - name: SonarCloud Check 
-      run: sonar-scanner 
