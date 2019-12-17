@@ -20,7 +20,7 @@
 
 An ethereum smart contract event cache. Query your smart contract events in ways that you can't do directly on the blockchain. A helpful development tool or a helpful addition to your production Dapp.
 
-## dAche event tracking
+## dAche Event Tracking
 
 There are three components that dAche uses to track events:
 
