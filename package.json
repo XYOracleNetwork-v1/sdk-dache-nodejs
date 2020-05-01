@@ -4,7 +4,9 @@
   "description": "",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node app.js"
+    "start": "node app.js",
+    "snyk-protect": "snyk protect",
+    "prepare": "npm run snyk-protect"
   },
   "keywords": [],
   "author": "",
@@ -36,6 +38,8 @@
     "ipfs-api": "^24.0.2",
     "nedb": "^1.8.0",
     "pg-promise": "^8.6.4",
-    "web3": "^1.2.0"
-  }
+    "web3": "^1.2.0",
+    "snyk": "^1.316.1"
+  },
+  "snyk": true
 }
