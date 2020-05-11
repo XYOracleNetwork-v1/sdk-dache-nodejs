@@ -5,7 +5,6 @@
 # dAche
 
 ![](https://github.com/XYOracleNetwork/sdk-dache-nodejs/workflows/CI/badge.svg?branch=develop) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/1f31c7fa87694b8eab91a2d71f74b697)](https://www.codacy.com/app/arietrouw/sdk-dache-nodejs?utm_source=github.com&utm_medium=referral&utm_content=XYOracleNetwork/sdk-dache-nodejs&utm_campaign=Badge_Grade) [![Maintainability](https://api.codeclimate.com/v1/badges/cdcefde37065f86758d6/maintainability)](https://codeclimate.com/github/XYOracleNetwork/sdk-dache-nodejs/maintainability) [![BCH compliance](https://bettercodehub.com/edge/badge/XYOracleNetwork/sdk-dache-nodejs?branch=master)](https://bettercodehub.com/)
-[![Known Vulnerabilities](https://snyk.io/test/github/XYOracleNetwork/sdk-dache-nodejs/badge.svg?targetFile=package.json)](https://snyk.io/test/github/XYOracleNetwork/sdk-dache-nodejs?targetFile=package.json)
 
 > The XYO Foundation provides this source code available in our efforts to advance the understanding of the XYO Procotol and its possible uses. We continue to maintain this software in the interest of developer education. Usage of this source code is not intended for production.
 
