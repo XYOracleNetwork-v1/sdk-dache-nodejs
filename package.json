@@ -4,9 +4,7 @@
   "description": "",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node app.js",
-    "snyk-protect": "snyk protect",
-    "prepare": "npm run snyk-protect"
+    "start": "node app.js"
   },
   "keywords": [],
   "author": "",
@@ -28,18 +26,16 @@
   },
   "dependencies": {
     "aws-sdk": "^2.426.0",
-    "config": "^2.0.2",
+    "config": "^3.3.1",
     "cors": "^2.8.5",
     "express": "^4.16.4",
     "express-graphql": "^0.6.12",
     "graphql": "^14.1.1",
     "graphql-import": "^0.7.1",
     "graphql-tools": "^4.0.4",
-    "ipfs-api": "^24.0.2",
+    "ipfs-http-client": "^44.0.3",
     "nedb": "^1.8.0",
     "pg-promise": "^8.6.4",
-    "web3": "^1.2.0",
-    "snyk": "^1.316.1"
-  },
-  "snyk": true
+    "web3": "^1.2.7"
+  }
 }
